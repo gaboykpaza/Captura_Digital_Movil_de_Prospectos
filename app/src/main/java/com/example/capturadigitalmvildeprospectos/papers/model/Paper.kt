@@ -1,4 +1,10 @@
 package com.example.capturadigitalmvildeprospectos.papers.model
 
-class Paper {
-}
+data class Paper(
+    val id: String,
+    val titulo: String,
+    val resumen: String,
+    val autores: List<String>,
+    val anioPublicacion: Int,
+    val esFavorito: Boolean = false
+)

@@ -1,13 +1,13 @@
 package com.example.capturadigitalmvildeprospectos.navigation
 
-// Sealed class para definir rutas tipo-safe en la navegación
 sealed class Screen(val route: String) {
-    data object Home : Screen(route = "home_page")
-    data object Profile : Screen(route = "profile_page")
-    data object Settings : Screen(route = "settings_page")
-
-    // Ejemplo para rutas con argumentos (en caso de requerirse más adelante):
-    data class Detail(val itemId: String) : Screen(route = "detail_page/$itemId") {
-        fun buildRoute(): String = route.replace("{itemId}", itemId)
+    object BuscarPapers : Screen("buscar_papers")
+    object FavoritosPapers : Screen("favoritos_papers")
+    object Adaptabilidad : Screen("adaptabilidad")
+    object Camara : Screen("camara")
+    object Formulario : Screen("formulario")
+    object ResumenFormulario : Screen("resumen_formulario/{nombre}/{email}") {
+        fun createRoute(nombre: String, email: String) = "resumen_formulario/$nombre/$email"
     }
+    object NavegacionEjemplo : Screen("navegacion_ejemplo")
 }

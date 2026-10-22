@@ -1,4 +1,7 @@
 package com.example.capturadigitalmvildeprospectos
 
-class CapturaApplication {
-}
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class CapturaApplication : Application()
