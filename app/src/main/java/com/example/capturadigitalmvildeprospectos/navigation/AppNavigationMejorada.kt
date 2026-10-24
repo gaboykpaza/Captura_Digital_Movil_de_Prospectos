@@ -1,76 +1,50 @@
 package com.example.capturadigitalmvildeprospectos.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.capturadigitalmvildeprospectos.ejemplos.adaptabilidad.HomeScreenAdaptativa
-import com.example.capturadigitalmvildeprospectos.ejemplos.camara.PerfilScreen
-import com.example.capturadigitalmvildeprospectos.ejemplos.formularios.RegistroScreenMejorado
-import com.example.capturadigitalmvildeprospectos.ejemplos.formularios.ResumenScreen
-import com.example.capturadigitalmvildeprospectos.ejemplos.navegacion.PantallasMejoradas
-import com.example.capturadigitalmvildeprospectos.papers.ui.BuscarPapersScreen
-import com.example.capturadigitalmvildeprospectos.papers.ui.FavoritosScreen
+import com.example.capturadigitalmvildeprospectos.ui.PerfilScreen
+import com.example.capturadigitalmvildeprospectos.ui.prospectos.ListaProspectosScreen
+import com.example.capturadigitalmvildeprospectos.ui.prospectos.ListaProspectosViewModel
+import com.example.capturadigitalmvildeprospectos.ui.prospectos.RegistroProspectoScreen
 
 @Composable
-fun AppNavigationMejorada() {
-    val navController = rememberNavController()
-
+fun AppNavigation(
+    navController: NavHostController = rememberNavController()
+) {
     NavHost(
         navController = navController,
-        startDestination = Screen.BuscarPapers.route
+        startDestination = Screen.Registro.route
     ) {
-        composable(Screen.BuscarPapers.route) {
-            BuscarPapersScreen(
-                onNavigateToFavoritos = { navController.navigate(Screen.FavoritosPapers.route) },
-                onNavigateToEjemplos = { navController.navigate(Screen.Adaptabilidad.route) }
+        // Pantalla 1: Formulario de Registro de Prospectos
+        composable(Screen.Registro.route) {
+            RegistroProspectoScreen(
+                onIrALista = { navController.navigate(Screen.ListaProspectos.route) },
+                onIrACamara = { navController.navigate(Screen.PerfilCamara.route) }
             )
         }
 
-        composable(Screen.FavoritosPapers.route) {
-            FavoritosScreen(onBack = { navController.popBackStack() })
-        }
+        // Pantalla 2: Lista de Prospectos Guardados (Room)
+        composable(Screen.ListaProspectos.route) {
+            val viewModel: ListaProspectosViewModel = hiltViewModel()
+            val prospectos by viewModel.prospectos.collectAsState()
 
-        composable(Screen.Adaptabilidad.route) {
-            HomeScreenAdaptativa(
-                onNavigateToCamara = { navController.navigate(Screen.Camara.route) },
-                onNavigateToFormulario = { navController.navigate(Screen.Formulario.route) },
-                onNavigateToNavegacion = { navController.navigate(Screen.NavegacionEjemplo.route) }
+            ListaProspectosScreen(
+                prospectos = prospectos,
+                onVolver = { navController.popBackStack() }
             )
         }
 
-        composable(Screen.Camara.route) {
-            PerfilScreen(onBack = { navController.popBackStack() })
-        }
-
-        composable(Screen.Formulario.route) {
-            RegistroScreenMejorado(
-                onSuccess = { nombre, email ->
-                    navController.navigate(Screen.ResumenFormulario.createRoute(nombre, email))
-                }
+        // Pantalla 3: Captura de Foto
+        composable(Screen.PerfilCamara.route) {
+            PerfilScreen(
+                onVolver = { navController.popBackStack() }
             )
-        }
-
-        composable(
-            route = Screen.ResumenFormulario.route,
-            arguments = listOf(
-                navArgument("nombre") { type = NavType.StringType },
-                navArgument("email") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-            ResumenScreen(
-                nombre = nombre,
-                email = email,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable(Screen.NavegacionEjemplo.route) {
-            PantallasMejoradas(onBack = { navController.popBackStack() })
         }
     }
 }
