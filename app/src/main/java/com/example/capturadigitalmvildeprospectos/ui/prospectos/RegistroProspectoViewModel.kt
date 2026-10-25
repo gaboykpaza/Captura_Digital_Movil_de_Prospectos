@@ -1,6 +1,5 @@
 package com.example.capturadigitalmvildeprospectos.ui.prospectos
 
-import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.capturadigitalmvildeprospectos.data.repository.ProspectoRepository
@@ -30,37 +29,53 @@ class RegistroProspectoViewModel @Inject constructor(
 
     fun guardarProspecto() {
         val s = _state.value
-        val emailValido = Patterns.EMAIL_ADDRESS.matcher(s.email).matches()
-        val telefonoValido = s.telefono.matches(Regex("^(\\+?56)?9\\d{8}\$")) || s.telefono.length >= 8
+
+        // Validación estricta de Correo (Regex estándar de e-mail)
+        val emailRegex = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}\$")
+        val emailValido = emailRegex.matches(s.email.trim())
+
+        // Validación estricta de Teléfono (Chileno: +569XXXXXXXX o 9 dígitos)
+        val telefonoRegex = Regex("^(\\+?56)?9\\d{8}\$")
+        val telefonoValido = telefonoRegex.matches(s.telefono.trim())
 
         var hayError = false
+
         if (s.nombre.isBlank()) {
             _state.value = _state.value.copy(errorNombre = "El nombre es obligatorio")
             hayError = true
         }
+
         if (!emailValido) {
-            _state.value = _state.value.copy(errorEmail = "Ingrese un correo válido")
-            hayError = true
-        }
-        if (!telefonoValido) {
-            _state.value = _state.value.copy(errorTelefono = "Formato de teléfono inválido (+569XXXXXXXX)")
+            _state.value = _state.value.copy(errorEmail = "Ingrese un correo válido (ej: usuario@dominio.cl)")
             hayError = true
         }
 
-        if (!hayError) {
-            viewModelScope.launch {
-                repository.guardarProspectoLocal(
-                    nombre = s.nombre,
-                    email = s.email,
-                    telefono = s.telefono,
-                    nivelEducativo = s.nivelEducativo,
-                    cursoInteres = s.cursoInteres,
-                    modalidad = s.modalidad,
-                    canalContacto = s.canalContacto,
-                    observaciones = s.observaciones
-                )
-                _state.value = _state.value.copy(registroExitoso = true)
-            }
+        if (!telefonoValido) {
+            _state.value = _state.value.copy(errorTelefono = "Teléfono inválido. Use formato +56912345678 o 912345678")
+            hayError = true
+        }
+
+        // Bloqueo de guardado si hay cualquier error de validación
+        if (hayError) return
+
+        viewModelScope.launch {
+            repository.guardarProspectoLocal(
+                nombre = s.nombre.trim(),
+                email = s.email.trim(),
+                telefono = s.telefono.trim(),
+                nivelEducativo = s.nivelEducativo,
+                cursoInteres = s.cursoInteres,
+                modalidad = s.modalidad,
+                canalContacto = s.canalContacto,
+                observaciones = s.observaciones
+            )
+            _state.value = _state.value.copy(
+                registroExitoso = true,
+                nombre = "",
+                email = "",
+                telefono = "",
+                observaciones = ""
+            )
         }
     }
 }

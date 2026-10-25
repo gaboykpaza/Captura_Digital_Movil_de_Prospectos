@@ -18,16 +18,23 @@ class SyncProspectosWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
+        // 1. Obtiene solo registros pendientes (sincronizado == false)
         val pendientes = prospectoDao.obtenerPendientesSincronizacion()
+
+        if (pendientes.isEmpty()) {
+            return Result.success()
+        }
 
         for (prospecto in pendientes) {
             try {
                 val response = prospectoApi.enviarProspecto(prospecto)
                 if (response.isSuccessful) {
+                    // 2. Marca como sincronizado inmediatamente para evitar duplicación
                     prospectoDao.marcarComoSincronizado(prospecto.id)
                 }
             } catch (e: Exception) {
-                return Result.retry() // Si falla, reintenta cuando vuelva la red
+                // Si la red falla a mitad del ciclo, reintenta más tarde sin duplicar los ya marcados
+                return Result.retry()
             }
         }
         return Result.success()

@@ -59,10 +59,13 @@ fun ListaProspectosScreen(
                                 ) {
                                     Text(
                                         text = prospecto.nombre,
-                                        style = MaterialTheme.typography.titleMedium
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.weight(1f) // <-- Agregado para que tome el espacio sobrante
                                     )
 
-                                    // Badge visual del estado de sincronización diferida
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    // Badge visual de estado
                                     AssistChip(
                                         onClick = { },
                                         label = { Text(if (prospecto.sincronizado) "Sincronizado" else "Pendiente Offline") },
