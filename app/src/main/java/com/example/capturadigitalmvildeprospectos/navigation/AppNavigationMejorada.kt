@@ -36,7 +36,8 @@ fun AppNavigation(
 
             ListaProspectosScreen(
                 prospectos = prospectos,
-                onVolver = { navController.popBackStack() }
+                onVolver = { navController.popBackStack() },
+                onSincronizar = { viewModel.sincronizarManualmente() }
             )
         }
 

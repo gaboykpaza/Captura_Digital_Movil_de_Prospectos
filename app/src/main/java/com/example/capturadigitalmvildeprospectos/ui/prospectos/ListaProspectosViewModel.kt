@@ -21,7 +21,6 @@ class ListaProspectosViewModel @Inject constructor(
 ) : ViewModel() {
 
     init {
-        // Al abrir la pantalla de la lista, fuerza a WorkManager a procesar pendientes si hay red
         sincronizarPendientesAhora()
     }
 
@@ -31,6 +30,10 @@ class ListaProspectosViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun sincronizarManualmente() {
+        sincronizarPendientesAhora()
+    }
 
     private fun sincronizarPendientesAhora() {
         val restricciones = Constraints.Builder()

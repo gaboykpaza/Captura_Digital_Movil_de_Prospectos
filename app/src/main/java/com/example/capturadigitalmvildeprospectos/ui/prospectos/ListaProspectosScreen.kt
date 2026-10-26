@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,7 +18,8 @@ import com.example.capturadigitalmvildeprospectos.data.local.ProspectoEntity
 @Composable
 fun ListaProspectosScreen(
     prospectos: List<ProspectoEntity>,
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onSincronizar: () -> Unit // <-- Evento para la sincronización manual
 ) {
     Scaffold(
         topBar = {
@@ -28,6 +30,15 @@ fun ListaProspectosScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    // Botón de sincronización manual / recarga
+                    IconButton(onClick = onSincronizar) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Sincronizar pendientes"
                         )
                     }
                 }
@@ -60,12 +71,11 @@ fun ListaProspectosScreen(
                                     Text(
                                         text = prospecto.nombre,
                                         style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier.weight(1f) // <-- Agregado para que tome el espacio sobrante
+                                        modifier = Modifier.weight(1f)
                                     )
 
                                     Spacer(modifier = Modifier.width(8.dp))
 
-                                    // Badge visual de estado
                                     AssistChip(
                                         onClick = { },
                                         label = { Text(if (prospecto.sincronizado) "Sincronizado" else "Pendiente Offline") },
