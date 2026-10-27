@@ -25,7 +25,7 @@ class ProspectoRepository @Inject constructor(
             sincronizado = false
         )
 
-        // 1. Guardar localmente en Room (devuelve un id de tipo Long)
+        // 1. Guardar localmente en Room (devuelve Long)
         val idGenerado = prospectoDao.insertarProspecto(nuevoProspecto)
 
         // 2. Intentar envío inmediato a Spring Boot
@@ -36,6 +36,22 @@ class ProspectoRepository @Inject constructor(
             }
         } catch (e: Exception) {
             // Permanece como sincronizado = false en Room
+        }
+    }
+
+    // Método para procesar inmediatamente todos los pendientes
+    suspend fun sincronizarPendientes(): Boolean {
+        return try {
+            val pendientes = prospectoDao.obtenerPendientesSincronizacion()
+            for (prospecto in pendientes) {
+                val response = prospectoApi.enviarProspecto(prospecto)
+                if (response.isSuccessful) {
+                    prospectoDao.marcarComoSincronizado(prospecto.id)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 }

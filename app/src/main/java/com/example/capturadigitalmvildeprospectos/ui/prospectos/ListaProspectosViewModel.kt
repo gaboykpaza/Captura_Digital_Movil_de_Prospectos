@@ -12,16 +12,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ListaProspectosViewModel @Inject constructor(
-    repository: ProspectoRepository,
+    private val repository: ProspectoRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     init {
-        sincronizarPendientesAhora()
+        sincronizarManualmente()
     }
 
     val prospectos: StateFlow<List<ProspectoEntity>> = repository.obtenerProspectos()
@@ -32,7 +33,12 @@ class ListaProspectosViewModel @Inject constructor(
         )
 
     fun sincronizarManualmente() {
-        sincronizarPendientesAhora()
+        viewModelScope.launch {
+            // Sincronización inmediata directa
+            repository.sincronizarPendientes()
+            // Respaldo secundario con WorkManager
+            sincronizarPendientesAhora()
+        }
     }
 
     private fun sincronizarPendientesAhora() {
